@@ -16,7 +16,7 @@ export const RemotionRoot: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					text: 'Working with TTS (Azure + AWS S3)',
+					text: 'Working with TS(Azure + AWS S3)',
 					titleColor: 'black',
 					voice: 'enUSWoman1' as const,
 					displaySpeed: 10,

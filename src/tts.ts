@@ -52,6 +52,60 @@ export const synthesizeSpeech = async (
 									</voice>
                 </speak>`.trim();
 
+	const response = await fetch(
+		`https://${env.AZURE_TTS_REGION}.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/batchsynthesis`,
+		{
+			headers: {
+				'content-type': 'application/json',
+				'Ocp-Apim-Subscription-Key': env.AZURE_TTS_KEY,
+			},
+			method: 'post',
+			body: JSON.stringify({
+				displayName: 'CustomVoiceTest',
+				description: 'CustomVoiceTest',
+				textType: 'SSML',
+				inputs: [
+					{
+						text: ssml,
+					},
+				],
+				properties: {
+					wordBoundaryEnabled: true,
+				},
+			}),
+		}
+	);
+	const res = await response.json();
+	console.log(res.id);
+
+	for (let i = 0; i < 10; i++) {
+		const getRes = await fetch(
+			`https://${env.AZURE_TTS_REGION}.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/batchsynthesis/${res.id}`,
+			{
+				headers: {
+					'content-type': 'application/json',
+					'Ocp-Apim-Subscription-Key': env.AZURE_TTS_KEY,
+				},
+				method: 'get',
+			}
+		);
+		const asJson = await getRes.json();
+		if (asJson.status === 'Succeeded') {
+			console.log('Successful!');
+			console.log(asJson);
+			console.log(asJson.outputs.result);
+			break;
+		} else if (asJson.status === 'Failed') {
+			console.log('Failed');
+			break;
+		}
+		await new Promise((resolve) => {
+			setTimeout(() => {
+				resolve('bla');
+			}, 1000);
+		});
+	}
+
 	const result = await new Promise<SpeechSynthesisResult>((resolve, reject) => {
 		synthesizer.speakSsmlAsync(
 			ssml,
